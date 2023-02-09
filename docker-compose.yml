@@ -5,7 +5,8 @@ volumes:
 
 networks:
   rfb-cnpj:
-    name: rfb_cnpj_net
+    external:
+      name: rfb_cnpj_net
 
 services:
   postgresql:
@@ -23,10 +24,12 @@ services:
     networks:
       - rfb-cnpj
   
-  rfb-cnpj:
+  rfb-cnpj:    
     container_name: rfb-cnpj
     build: .
     image: rfb-cnpj
+    environment:
+    - TZ=America/Sao_Paulo
     # Diretório onde serão baixados os arquivos da receita
     # Para facilitar, foi criado um diretório diretamente na raiz do projeto
     # Caso queira usar outro diretório, apenas altere na linha abaixo 
@@ -36,11 +39,33 @@ services:
     # Verifique a documentação para conhecer os parâmetros
     # Atenção ao detalhe que o parâmetro diretorio_arquivos aponta para o diretório dentro do volume mapeado anteriormente.
     # E o parametro database_url contem a string de conexão com o container do postgresql instanciado também por esse arquivo
-    command: python main.py --diretorio_arquivos '/usr/src/rfb-cnpj/download' --database_url 'postgresql://postgres:postgres@rfb-cnpj-dbdata:5432/rfb_cnpj'
-    #command: python main.py --diretorio_arquivos '/usr/src/rfb-cnpj/download' --database_url 'postgresql://postgres:postgres@postgres11:5432/rfb_cnpj'
+    #command: python main.py --diretorio_arquivos '/usr/src/rfb-cnpj/download' --database_url 'postgresql://postgres:postgres@rfb-cnpj-dbdata:5432/rfb_cnpj'    
     depends_on:
       - postgresql
     networks:
       - rfb-cnpj
+    labels:
+      ofelia.enabled: "true"
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+    depends_on:
+      - rfb-cnpj
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: "America/Sao_Paulo"
+    labels:
+       #ofelia.job-run.carga-rfb.schedule: "0 35 8 * * *"
+       #ofelia.job-run.carga-rfb.command: "python main.py --diretorio_arquivos '/usr/src/rfb-cnpj/download' --database_url 'postgresql://postgres:postgres@192.168.1.5:5436/rfb_cnpj'"
+       ofelia.job-run.carga-rfb.schedule: "${CRON}"
+       ofelia.job-run.carga-rfb.command: "python main.py --diretorio_arquivos '/usr/src/rfb-cnpj/download' --database_url '${URL_BANCO}:${PORTA_BANCO}/${NOME_BANCO}'"
+       ofelia.job-run.carga-rfb.image: "rfb-cnpj"
+       ofelia.job-run.carga-rfb.network: "rfb-cnpj"
+
+    networks:
+      - rfb-cnpj
+
 
 
