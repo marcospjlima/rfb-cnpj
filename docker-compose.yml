@@ -4,9 +4,8 @@ volumes:
   rfb-cnpj-dbdata:
 
 networks:
-  rfb-cnpj:
-    external:
-      name: rfb_cnpj_net
+  rfb-cnpj:    
+    name: rfb_cnpj_net
 
 services:
   postgresql:
@@ -14,7 +13,7 @@ services:
     image: postgres:12.5
     restart: 'unless-stopped'
     ports: 
-      - "5436:5432"
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
