@@ -28,6 +28,8 @@ from zipfile import ZipFile
 from rfb.utils import NAMES_PATTERNS
 from rfb.utils import convert
 
+import send_email
+
 log = getLogger(__name__)
 
 
@@ -268,7 +270,7 @@ class ConvertDatabase:
             parse_function = f'parse_{pattern_name}'
 
         for file in files_csvs:
-            self._execute(
+            assunto = self._execute(
                 populate_name=populate_name,
                 columns=qt_column,
                 parse_function=parse_function,
@@ -279,6 +281,8 @@ class ConvertDatabase:
         info = f'[{populate_name}] Finalizado a inserção dos { populate_name }'
         log.info(info)
         click.echo(info, nl=True)
+        
+        send_email.enviar_email( assunto, info)
 
     def _execute(self, file: PurePath, populate_name: str,
                  columns: int, model: DeclarativeMeta,
@@ -316,9 +320,9 @@ class ConvertDatabase:
             rows_cache.append(parse_function(row))
 
             if i > 0 and i % settings.CHUNK_ROWS_INSERT_DATABASE == 0:
-                msg = f'[{populate_name}] Inserindo o registro { i + 1 } do arquivo {file}'
-                log.debug(msg)
-                click.echo(msg, nl=True)
+                #msg = f'[{populate_name}] Inserindo o registro { i + 1 } do arquivo {file}'
+                #log.debug(msg)
+                #click.echo(msg, nl=True)
                 self.session.bulk_insert_mappings(model, rows_cache)
                 self.session.commit()
                 rows_cache = []
@@ -327,3 +331,11 @@ class ConvertDatabase:
         if rows_cache:
             self.session.bulk_insert_mappings(model, rows_cache)
             self.session.commit()
+
+        total = sum(1 for _ in enumerate(read_file(file))) 
+
+        msg = f'[{populate_name}] Total de registros { total } do arquivo {file}'
+        log.info(msg)
+        click.echo(msg, nl=True)
+        
+        return msg

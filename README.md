@@ -16,12 +16,29 @@
  - Converter os dados de empresa, estabelecimento, sócio, cnae, países, municípios qualificações, naturezas e dados do simples para um SGBD compatível com a biblioteca SQLAchemy.
 - Possibilidade de executar o processo em threads, melhorando significativamente a performance
 
+** Preparação
+ - Criar nas variáveis de ambiente as informações contidas no arquivo env-exemplo ou colocar o arquivo .env em um nivel acima do projeto.  
+   Exemplo:
+ 
+ Ao descompactar o projeto, ele ficará na 
+ 
+ ```
+ /projetos/rfb-cnpj
+ ```
+ 
+ Coloca o arquivo .env em /projetos
+ 
+ ```
+ /projetos
+ ```
+
+	
 **Docker**
 
  - Para facilitar o teste/uso dessa biblioteca, disponibilizamos os arquivos Dockerfile e docker-compose.yml com o PostgreSQL
  - Para usar basta estar na raiz do projeto e executar o seguinte comando:
    ```
-    docker-compose up -d
+    docker compose --env-file ./../.env up -d 
    ```
  - Caso não tenha familiaridade com Docker, por favor consulte a documentação
 

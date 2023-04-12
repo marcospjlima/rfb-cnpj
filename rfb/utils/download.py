@@ -111,7 +111,9 @@ def _download(url: str, path: str = '', retry_count: int = 0) -> None:
                     status = f"\rDownloading {file_name}: {file_size_dl_mb:10.2f}/{file_size_mb:2.2f} MB  [{percent:3.2f}%] " \
                              f"[{velocity:.3f} Mbps]"
 
-                    click.echo(status, nl=False)
+                    if percent == 100:
+                        click.echo(status, nl=False)
+
     except ConnectionResetError:
         # Ignora essa excessão, pois irá cair no else abaixo e reiniciar o download
         pass
