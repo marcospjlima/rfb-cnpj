@@ -277,12 +277,14 @@ class ConvertDatabase:
                 model=model,
                 file=file
             )
-
+            info = f'[{populate_name}] Finalizado a inserção do arquivo { file }'
+            send_email.enviar_email( assunto, info)
+            
         info = f'[{populate_name}] Finalizado a inserção dos { populate_name }'
         log.info(info)
         click.echo(info, nl=True)
         
-        send_email.enviar_email( assunto, info)
+        #send_email.enviar_email( assunto, info)
 
     def _execute(self, file: PurePath, populate_name: str,
                  columns: int, model: DeclarativeMeta,
